@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-interface ChartData {
+export interface ChartData {
   time: string;
   id: string;
   value_area: number;
   value_bar: number;
 }
 
-export const useChartData = () => {
+export const useChartDataFetch = () => {
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

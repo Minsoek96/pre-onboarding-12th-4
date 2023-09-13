@@ -1,6 +1,6 @@
-import React from "react";
 import { Chart } from "react-chartjs-2";
-import { useChartData } from "../hooks/useChartData"; // 실제 훅 파일 경로로 바꾸세요
+import React, { useState } from "react";
+import { useChartDataFetch } from "../hooks/useChartDataFetch";
 import {
   Chart as ChartJS,
   LinearScale,
@@ -12,10 +12,14 @@ import {
   Tooltip,
   LineController,
   BarController,
-  TooltipItem,
   Title,
   Filler,
 } from "chart.js";
+import ChartController from "./ChartController";
+import { ChartDataManager } from "../services/ChartDataManage";
+import { getChartOptions } from "../utils/getChartOptions";
+import { getChartData } from "../utils/getChartData";
+import styled from "styled-components";
 
 ChartJS.register(
   LinearScale,
@@ -32,67 +36,47 @@ ChartJS.register(
 );
 
 const ChartComponent = () => {
-  const { chartData, isLoading } = useChartData();
-  const label = chartData.map((item) => item.time);
-  const uniqueIds = Array.from(new Set(chartData.map((a) => a.id)));
-  console.log(uniqueIds)
+  const { chartData, isLoading } = useChartDataFetch();
+  const [selectChartBtn, setSelectChartBtn] = useState("");
+  const chartManger = new ChartDataManager(chartData, selectChartBtn);
+  const chartBtnString = chartManger.getUniqueString();
 
   if (isLoading) {
     return <p>Loading...</p>;
   }
 
-  const data = {
-    labels: chartData.map((item) => item.time),
-    datasets: [
-      {
-        yAxisID: "y1",
-        data: chartData.map((item) => item.value_area),
-        type: "line" as const,
-        label: "value_area",
-        borderWidth: 1,
-        borderColor: "rgb(255, 152, 152)",
-        tension: 0.5,
-        pointRadius: 0,
-        fill: true,
-        backgroundColor: "rgba(255, 152, 152, 0.5)",
-      },
-      {
-        yAxisID: "y2",
-        data: chartData.map((item) => item.value_bar),
-        type: "bar" as const,
-        label: "Value Bar",
-        borderColor: "rgb(53, 162, 235)",
-        backgroundColor: "rgba(53, 162, 235, 0.5)",
-      },
-    ],
+  const data = getChartData(chartManger);
+  const options = getChartOptions(chartData);
+  const changeSelectId = (id: string) => {
+    const isSelectValueMatch = id === selectChartBtn;
+    if (isSelectValueMatch) {
+      setSelectChartBtn("");
+      return;
+    }
+    setSelectChartBtn(id);
   };
 
-  const options = {
-    scales: {
-      y1: {
-        beginAtZero: true,
-        position: "left" as const,
-      },
-      y2: {
-        beginAtZero: true,
-        position: "right" as const,
-      },
-    },
-    plugins: {
-      tooltip: {
-        callbacks: {
-          label: (tooltipItem: TooltipItem<"bar">) => {
-            const label = tooltipItem.dataset.label || "";
-            const value = tooltipItem.parsed.y;
-            const region = chartData[tooltipItem.dataIndex]?.id || "Unknown";
-            return [`${label}: ${value}`, `Region: ${region}`];
-          },
-        },
-      },
-    },
-  };
-
-  return <Chart type="bar" data={data} options={options} />;
+  return (
+    <S.Container>
+      <Chart type="bar" data={data} options={options} />
+      <ChartController
+        selectChartBtn={selectChartBtn}
+        chartBtnString={chartBtnString}
+        changeSelectId={changeSelectId}
+      ></ChartController>
+    </S.Container>
+  );
 };
 
 export default ChartComponent;
+
+const S = {
+  Container: styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-height: 500px;
+    margin-top: 150px;
+  `
+}
