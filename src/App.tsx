@@ -1,16 +1,16 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { worker } from "./mock/worker";
+import Chart from "./components/Chart";
+import ChartBtn from "./components/ChartBtn";
 worker.start();
 
 function App() {
-  useEffect(() => {
-    fetch("/")
-      .then((res) => res.json())
-      .then((data) => console.log(data))
-      .catch((error) => console.error('error', error));
-  }, []);
-
-  return <div className="App">{"메인 페이지"}</div>;
+  return (
+    <div className="App">
+      <Chart />
+      <ChartBtn />
+    </div>
+  );
 }
 
 export default App;
