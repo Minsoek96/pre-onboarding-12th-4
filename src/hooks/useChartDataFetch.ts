@@ -11,6 +11,7 @@ export interface ChartData {
 export const useChartDataFetch = () => {
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,12 +25,12 @@ export const useChartDataFetch = () => {
         setChartData(newData);
         setIsLoading(false);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        setIsError(true);
       }
     };
 
     fetchData();
   }, []);
 
-  return { chartData, isLoading };
+  return { chartData, isLoading, isError };
 };

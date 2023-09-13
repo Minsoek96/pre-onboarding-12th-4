@@ -20,6 +20,7 @@ import { ChartDataManager } from "../services/ChartDataManage";
 import { getChartOptions } from "../utils/getChartOptions";
 import { getChartData } from "../utils/getChartData";
 import styled from "styled-components";
+import Spinner from "./Spinner";
 
 ChartJS.register(
   LinearScale,
@@ -36,13 +37,16 @@ ChartJS.register(
 );
 
 const ChartComponent = () => {
-  const { chartData, isLoading } = useChartDataFetch();
+  const { chartData, isLoading, isError } = useChartDataFetch();
   const [selectChartBtn, setSelectChartBtn] = useState("");
   const chartManger = new ChartDataManager(chartData, selectChartBtn);
   const chartBtnString = chartManger.getUniqueString();
 
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <Spinner/>;
+  }
+  if (isError) {
+    return <p>"Error fetching data"</p>
   }
 
   const data = getChartData(chartManger);
